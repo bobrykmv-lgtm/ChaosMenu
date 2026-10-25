@@ -17,4 +17,3 @@ permissions:
   chaosmenu.admin:
     description: Получать обращения игроков
     default: op
-    
