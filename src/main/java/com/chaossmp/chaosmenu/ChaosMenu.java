@@ -1,4 +1,3 @@
-```java
 package com.chaossmp.chaosmenu;
 
 import org.bukkit.Bukkit;
@@ -240,4 +239,3 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
         });
     }
 }
-```
