@@ -68,13 +68,20 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
                 "§7Правила и механики ChaosSMP"
         ));
 
-        menu.setItem(12, createItem(
+        // Новая кнопка для вкладки "Правила"
+        menu.setItem(11, createItem(
+                Material.BOOK_AND_QUILL,
+                "§e§l📜 Правила сервера",
+                "§7Ознакомьтесь с правилами ChaosSMP"
+        ));
+
+        menu.setItem(13, createItem(
                 Material.BOOK,
                 "§e§lПомощь администрации",
                 "§7Нажми, чтобы отправить сообщение"
         ));
 
-        menu.setItem(14, createItem(
+        menu.setItem(15, createItem(
                 Material.NETHER_STAR,
                 "§d§lМоя статистика",
                 "§7Посмотреть информацию о хаосе"
@@ -95,10 +102,49 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
         player.openInventory(menu);
     }
 
+    private void openRulesPage1(Player player) {
+        Inventory rules = Bukkit.createInventory(
+                null,
+                27,
+                ChatColor.YELLOW.toString() + ChatColor.BOLD + "Правила (Страница 1/2)"
+        );
+
+        rules.setItem(10, createItem(Material.DIAMOND_SWORD, "§c1.1 Использование X-Ray", "§7Запрещено: Использовать X-Ray.", "§7Наказание: Бан на 1 день", "§7(Доказательства в канале #вопросы)"));
+        rules.setItem(11, createItem(Material.ENDER_PEARL, "§c1.2 Использование FreeCam", "§7Запрещено: Использовать FreeCam.", "§7Наказание: Бан на 5 часов", "§7(Доказательства в канале #вопросы)"));
+        rules.setItem(12, createItem(Material.STICK, "§c1.3 Помеха администрации", "§7Запрещено: Мешать админам.", "§7Наказание: Бан / Мут 30 минут", "§7(Доказательства в канале #вопросы)"));
+        rules.setItem(14, createItem(Material.GOLDEN_APPLE, "§62.3 Суммирование наказаний", "§7При нарушении 2-3 правил", "§7сроки наказаний суммируются.", "§7Пример: 1.3 + 1.2 = 5ч 30м"));
+        rules.setItem(15, createItem(Material.PAPER, "§b3.1 Оскорбления игроков", "§7Запрещено: Оскорблять игроков.", "§7Наказание: Мут на 1 час"));
+        rules.setItem(16, createItem(Material.BOOK, "§b3.2 Оскорбление родных", "§7Запрещено: Упоминать родных.", "§7Наказание: Мут на 3 часа"));
+
+        rules.setItem(18, createItem(Material.ARROW, "§eГлавное меню", "§7Вернуться назад"));
+        rules.setItem(26, createItem(Material.SPECTRAL_ARROW, "§eСледующая страница", "§7Перейти на стр. 2"));
+
+        player.openInventory(rules);
+    }
+
+    private void openRulesPage2(Player player) {
+        Inventory rules = Bukkit.createInventory(
+                null,
+                27,
+                ChatColor.YELLOW.toString() + ChatColor.BOLD + "Правила (Страница 2/2)"
+        );
+
+        rules.setItem(10, createItem(Material.SHIELD, "§45.5 Ненадлежащий присмотр", "§7Игнорирование нарушений.", "§7Наказание: Снятие OP на 10 мин", "§7или предупреждение."));
+        rules.setItem(11, createItem(Material.ENDER_EYE, "§45.6 Беспричинная телепортация", "§7ТП игроков к себе без причины.", "§7Наказание: Снятие OP на 10 мин"));
+        rules.setItem(12, createItem(Material.NETHERITE_SWORD, "§45.7 Превышение полномочий", "§7Убийство игроков через админку.", "§7Наказание: Снятие OP на 20 мин"));
+        rules.setItem(13, createItem(Material.BARRIER, "§45.8 Действия против сервера", "§7Вредительство работе сервера.", "§7Наказание: Строгое наказание"));
+        rules.setItem(15, createItem(Material.WRITABLE_BOOK, "§dРегламент банов", "§7Обязательно указывать причину.", "§7Пример: 1.1 Использование читов"));
+
+        rules.setItem(18, createItem(Material.ARROW, "§eПредыдущая страница", "§7Вернуться на стр. 1"));
+        rules.setItem(22, createItem(Material.ARROW, "§eГлавное меню", "§7Вернуться назад"));
+
+        player.openInventory(rules);
+    }
+
     private ItemStack createItem(
             Material material,
             String name,
-            String description
+            String... description
     ) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
@@ -118,9 +164,12 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
             return;
         }
 
-        if (!event.getView().getTitle().equals(
-                ChatColor.AQUA.toString() + ChatColor.BOLD + "CHAOSSMP"
-        )) {
+        String title = event.getView().getTitle();
+        String mainTitle = ChatColor.AQUA.toString() + ChatColor.BOLD + "CHAOSSMP";
+        String rules1Title = ChatColor.YELLOW.toString() + ChatColor.BOLD + "Правила (Страница 1/2)";
+        String rules2Title = ChatColor.YELLOW.toString() + ChatColor.BOLD + "Правила (Страница 2/2)";
+
+        if (!title.equals(mainTitle) && !title.equals(rules1Title) && !title.equals(rules2Title)) {
             return;
         }
 
@@ -130,13 +179,27 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
             return;
         }
 
-        switch (event.getRawSlot()) {
-            case 10 -> showInformation(player);
-            case 12 -> requestHelp(player);
-            case 14 -> showStatistics(player);
-            case 16 -> showCommands(player);
-            case 22 -> player.closeInventory();
-            default -> {
+        if (title.equals(mainTitle)) {
+            switch (event.getRawSlot()) {
+                case 10 -> showInformation(player);
+                case 11 -> openRulesPage1(player);
+                case 13 -> requestHelp(player);
+                case 15 -> showStatistics(player);
+                case 16 -> showCommands(player);
+                case 22 -> player.closeInventory();
+                default -> {}
+            }
+        } else if (title.equals(rules1Title)) {
+            if (event.getRawSlot() == 18) {
+                openMenu(player);
+            } else if (event.getRawSlot() == 26) {
+                openRulesPage2(player);
+            }
+        } else if (title.equals(rules2Title)) {
+            if (event.getRawSlot() == 18) {
+                openRulesPage1(player);
+            } else if (event.getRawSlot() == 22) {
+                openMenu(player);
             }
         }
     }
@@ -145,7 +208,7 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
         player.closeInventory();
 
         player.sendMessage("§8§m--------------------------------");
-        player.sendMessage("§b§l            CHAOSSMP");
+        player.sendMessage("§b§l           CHAOSSMP");
         player.sendMessage("§7Сервер выживания с собственными механиками.");
         player.sendMessage("");
         player.sendMessage("§c• §fБан за смерть: §e3 минуты");
