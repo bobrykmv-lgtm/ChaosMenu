@@ -68,8 +68,9 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
                 "§7Правила и механики ChaosSMP"
         ));
 
+        // Виправлено BOOK_AND_QUILL на WRITABLE_BOOK для версії 1.21
         menu.setItem(11, createItem(
-                Material.BOOK_AND_QUILL,
+                Material.WRITABLE_BOOK,
                 "§e§l📜 Правила сервера",
                 "§7Ознакомьтесь с правилами ChaosSMP"
         ));
@@ -229,6 +230,7 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
         player.sendMessage("§b[ChaosSMP] §fТаблица лидеров: §e/chaos top");
     }
 
+    @SuppressWarnings("deprecation")
     private void showCommands(Player player) {
         player.closeInventory();
 
