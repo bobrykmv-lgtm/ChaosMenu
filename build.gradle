@@ -13,14 +13,12 @@ java {
 
 repositories {
     mavenCentral()
-    // Репозиторій для Purpur / Paper API
     maven {
         url = uri('https://repo.papermc.io/repository/maven-public/')
     }
 }
 
 dependencies {
-    // Підключаємо Paper/Purpur API версії 1.21 (або 1.21.11 залежно від вашого серверного середовища)
     compileOnly 'io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT'
 }
 
