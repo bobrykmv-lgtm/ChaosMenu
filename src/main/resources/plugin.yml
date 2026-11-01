@@ -2,18 +2,20 @@ name: ChaosMenu
 version: 1.0.0
 main: com.chaossmp.chaosmenu.ChaosMenu
 api-version: '1.21'
-description: Menu plugin for ChaosSMP
+author: ChaosSMP
+description: Интерактивное меню сервера ChaosSMP
 
 commands:
   menu:
-    description: Открыть меню ChaosSMP
+    description: Открыть главное меню сервера
     usage: /menu
-    permission: chaosmenu.menu
+    permission: chaosmenu.use
+    permission-message: У вас нет прав на использование этой команды!
 
 permissions:
-  chaosmenu.menu:
-    description: Разрешает открывать меню сервера
-    default: true
   chaosmenu.admin:
-    description: Получать обращения игроков
+    description: Дает право получать обращения от игроков в чате
     default: op
+  chaosmenu.use:
+    description: Разрешает открывать главное меню
+    default: true
