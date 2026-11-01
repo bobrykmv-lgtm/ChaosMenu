@@ -68,7 +68,6 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
                 "§7Правила и механики ChaosSMP"
         ));
 
-        // Новая кнопка для вкладки "Правила"
         menu.setItem(11, createItem(
                 Material.BOOK_AND_QUILL,
                 "§e§l📜 Правила сервера",
