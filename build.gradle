@@ -1,24 +1,38 @@
 plugins {
-id 'java'
+    id 'java'
 }
 
 group = 'com.chaossmp'
 version = '1.0.0'
 
-repositories {
-mavenCentral()
-maven {
-name = 'papermc'
-url = 'https://repo.papermc.io/repository/maven-public/'
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
+
+repositories {
+    mavenCentral()
+    // Репозиторій для Purpur / Paper API
+    maven {
+        url = uri('https://repo.papermc.io/repository/maven-public/')
+    }
 }
 
 dependencies {
-compileOnly 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
+    // Підключаємо Paper/Purpur API версії 1.21 (або 1.21.11 залежно від вашого серверного середовища)
+    compileOnly 'io.papermc.paper:paper-api:1.21-R0.1-SNAPSHOT'
 }
 
-java {
-toolchain {
-languageVersion = JavaLanguageVersion.of(21)
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
 }
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
 }
