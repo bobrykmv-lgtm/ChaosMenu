@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -21,6 +22,11 @@ import java.util.Set;
 import java.util.UUID;
 
 public final class ChaosMenu extends JavaPlugin implements Listener {
+
+    private static final String MAIN_TITLE = ChatColor.AQUA.toString() + ChatColor.BOLD + "CHAOSSMP";
+    private static final String RULES_1_TITLE = ChatColor.YELLOW.toString() + ChatColor.BOLD + "Правила (Страница 1/2)";
+    private static final String RULES_2_TITLE = ChatColor.YELLOW.toString() + ChatColor.BOLD + "Правила (Страница 2/2)";
+    private static final int MAX_HELP_LENGTH = 200;
 
     private final Set<UUID> awaitingHelp = new HashSet<>();
 
@@ -56,19 +62,15 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
     }
 
     private void openMenu(Player player) {
-        Inventory menu = Bukkit.createInventory(
-                null,
-                27,
-                ChatColor.AQUA.toString() + ChatColor.BOLD + "CHAOSSMP"
-        );
+        Inventory menu = Bukkit.createInventory(null, 27, MAIN_TITLE);
+        fillBackground(menu);
 
         menu.setItem(10, createItem(
                 Material.COMPASS,
                 "§b§lИнформация о сервере",
-                "§7Правила и механики ChaosSMP"
+                "§7Механики, адрес и порты ChaosSMP"
         ));
 
-        // Виправлено BOOK_AND_QUILL на WRITABLE_BOOK для версії 1.21
         menu.setItem(11, createItem(
                 Material.WRITABLE_BOOK,
                 "§e§l📜 Правила сервера",
@@ -103,11 +105,8 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
     }
 
     private void openRulesPage1(Player player) {
-        Inventory rules = Bukkit.createInventory(
-                null,
-                27,
-                ChatColor.YELLOW.toString() + ChatColor.BOLD + "Правила (Страница 1/2)"
-        );
+        Inventory rules = Bukkit.createInventory(null, 27, RULES_1_TITLE);
+        fillBackground(rules);
 
         rules.setItem(10, createItem(Material.DIAMOND_SWORD, "§c1.1 Использование X-Ray", "§7Запрещено: Использовать X-Ray.", "§7Наказание: Бан на 1 день", "§7(Доказательства в канале #вопросы)"));
         rules.setItem(11, createItem(Material.ENDER_PEARL, "§c1.2 Использование FreeCam", "§7Запрещено: Использовать FreeCam.", "§7Наказание: Бан на 5 часов", "§7(Доказательства в канале #вопросы)"));
@@ -123,11 +122,8 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
     }
 
     private void openRulesPage2(Player player) {
-        Inventory rules = Bukkit.createInventory(
-                null,
-                27,
-                ChatColor.YELLOW.toString() + ChatColor.BOLD + "Правила (Страница 2/2)"
-        );
+        Inventory rules = Bukkit.createInventory(null, 27, RULES_2_TITLE);
+        fillBackground(rules);
 
         rules.setItem(10, createItem(Material.SHIELD, "§45.5 Ненадлежащий присмотр", "§7Игнорирование нарушений.", "§7Наказание: Снятие OP на 10 мин", "§7или предупреждение."));
         rules.setItem(11, createItem(Material.ENDER_EYE, "§45.6 Беспричинная телепортация", "§7ТП игроков к себе без причины.", "§7Наказание: Снятие OP на 10 мин"));
@@ -141,6 +137,13 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
         player.openInventory(rules);
     }
 
+    private void fillBackground(Inventory inventory) {
+        ItemStack filler = createItem(Material.GRAY_STAINED_GLASS_PANE, " ");
+        for (int i = 0; i < inventory.getSize(); i++) {
+            inventory.setItem(i, filler);
+        }
+    }
+
     private ItemStack createItem(
             Material material,
             String name,
@@ -151,7 +154,9 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
 
         if (meta != null) {
             meta.setDisplayName(name);
-            meta.setLore(Arrays.asList(description));
+            if (description.length > 0) {
+                meta.setLore(Arrays.asList(description));
+            }
             item.setItemMeta(meta);
         }
 
@@ -165,22 +170,23 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
         }
 
         String title = event.getView().getTitle();
-        String mainTitle = ChatColor.AQUA.toString() + ChatColor.BOLD + "CHAOSSMP";
-        String rules1Title = ChatColor.YELLOW.toString() + ChatColor.BOLD + "Правила (Страница 1/2)";
-        String rules2Title = ChatColor.YELLOW.toString() + ChatColor.BOLD + "Правила (Страница 2/2)";
-
-        if (!title.equals(mainTitle) && !title.equals(rules1Title) && !title.equals(rules2Title)) {
+        if (!title.equals(MAIN_TITLE) && !title.equals(RULES_1_TITLE) && !title.equals(RULES_2_TITLE)) {
             return;
         }
 
         event.setCancelled(true);
 
-        if (event.getRawSlot() < 0 || event.getRawSlot() >= 27) {
+        if (event.getClickedInventory() == null || !event.getClickedInventory().equals(event.getView().getTopInventory())) {
             return;
         }
 
-        if (title.equals(mainTitle)) {
-            switch (event.getRawSlot()) {
+        int slot = event.getRawSlot();
+        if (slot < 0 || slot >= 27) {
+            return;
+        }
+
+        if (title.equals(MAIN_TITLE)) {
+            switch (slot) {
                 case 10 -> showInformation(player);
                 case 11 -> openRulesPage1(player);
                 case 13 -> requestHelp(player);
@@ -189,16 +195,16 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
                 case 22 -> player.closeInventory();
                 default -> {}
             }
-        } else if (title.equals(rules1Title)) {
-            if (event.getRawSlot() == 18) {
+        } else if (title.equals(RULES_1_TITLE)) {
+            if (slot == 18) {
                 openMenu(player);
-            } else if (event.getRawSlot() == 26) {
+            } else if (slot == 26) {
                 openRulesPage2(player);
             }
-        } else if (title.equals(rules2Title)) {
-            if (event.getRawSlot() == 18) {
+        } else if (title.equals(RULES_2_TITLE)) {
+            if (slot == 18) {
                 openRulesPage1(player);
-            } else if (event.getRawSlot() == 22) {
+            } else if (slot == 22) {
                 openMenu(player);
             }
         }
@@ -210,6 +216,7 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
         player.sendMessage("§8§m--------------------------------");
         player.sendMessage("§b§l           CHAOSSMP");
         player.sendMessage("§7Сервер выживания с собственными механиками.");
+        player.sendMessage("§7IP: §fchaossmpgood.mcsh.gg §7| Java: §e12585 §7| Bedrock: §a12380");
         player.sendMessage("");
         player.sendMessage("§c• §fБан за смерть: §e3 минуты");
         player.sendMessage("§c• §fЗа убийство: §a+1 хаос");
@@ -230,13 +237,13 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
         player.sendMessage("§b[ChaosSMP] §fТаблица лидеров: §e/chaos top");
     }
 
-    @SuppressWarnings("deprecation")
     private void showCommands(Player player) {
         player.closeInventory();
 
         player.sendMessage("§8§m--------------------------------");
         player.sendMessage("§b§l      КОМАНДЫ CHAOSSMP");
         player.sendMessage("§e/menu §7— открыть меню");
+        player.sendMessage("§e/lang <ru|uk|en|off|auto> §7— язык автоперевода чата");
         player.sendMessage("§e/chaos §7— посмотреть свой хаос");
         player.sendMessage("§e/chaos top §7— таблица лидеров");
         player.sendMessage("§8§m--------------------------------");
@@ -251,10 +258,16 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
     }
 
     @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        awaitingHelp.remove(event.getPlayer().getUniqueId());
+    }
+
+    @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
+        UUID uuid = player.getUniqueId();
 
-        if (!awaitingHelp.contains(player.getUniqueId())) {
+        if (!awaitingHelp.contains(uuid)) {
             return;
         }
 
@@ -262,24 +275,27 @@ public final class ChaosMenu extends JavaPlugin implements Listener {
         String message = event.getMessage().trim();
 
         Bukkit.getScheduler().runTask(this, () -> {
-            if (!awaitingHelp.remove(player.getUniqueId())) {
+            if (!awaitingHelp.contains(uuid)) {
                 return;
             }
 
             if (message.equalsIgnoreCase("отмена")) {
+                awaitingHelp.remove(uuid);
                 player.sendMessage("§cОтправка сообщения отменена.");
                 return;
             }
 
             if (message.isBlank()) {
-                player.sendMessage("§cСообщение не может быть пустым.");
+                player.sendMessage("§cСообщение не может быть пустым. Напиши текст или §eотмена§c.");
                 return;
             }
 
-            if (message.length() > 200) {
-                player.sendMessage("§cСообщение слишком длинное. Максимум 200 символов.");
+            if (message.length() > MAX_HELP_LENGTH) {
+                player.sendMessage("§cСообщение слишком длинное (" + message.length() + "/" + MAX_HELP_LENGTH + "). Сократи или введи §eотмена§c.");
                 return;
             }
+
+            awaitingHelp.remove(uuid);
 
             String formatted = "§b[Обращение] §f"
                     + player.getName() + "§7: §f" + message;
